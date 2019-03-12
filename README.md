@@ -1,2 +1,2 @@
 # EdmEvGeneration
-Module for generating EDM format event from Gridpack and Sherpack
+simple script for generating EDM format event from Gridpack and Sherpack
