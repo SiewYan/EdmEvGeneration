@@ -16,7 +16,7 @@ else
 fi
 
 if [ -z $2 ];then
-    echo "ERROR, please supply gridpack"
+    echo "ERROR, please supply gridpack/sherpack"
     exit
 else
     tar=$2
@@ -30,7 +30,7 @@ fi
 ##add externalLHEProducer
 flag1=`grep "externalLHEProducer" $1 | awk -F '=' '{print $1}'`
 
-if [ "$flag1" != "externalLHEProducer" ];then
+if [ "$flag" != "externalLHEProducer" ];then
     CONFIG=${name}_cfi.py
     cat > ${CONFIG} <<EOF                                                                                                                                                                         
 import FWCore.ParameterSet.Config as cms 
@@ -57,7 +57,7 @@ scram b -j3
 echo "
 
 cmsDriver.py Configuration/GenProduction/python/ThirteenTeV/Hadronizer/${name}.py \
---mc -n 5000 -s LHE,GEN --datatier GEN,GEN-SIM --eventcontent LHE,RAWSIM \
+--mc -n 5000 -s GEN --datatier GEN-SIM --eventcontent RAWSIM \
 --conditions auto:run2_mc_FULL --beamspot Realistic25ns13TeVEarly2017Collision  --no_exec
 
 "
