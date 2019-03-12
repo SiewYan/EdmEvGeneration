@@ -7,6 +7,7 @@ simple script for generating EDM format event from Gridpack and Sherpack
 cmsrel CMSSW_9_3_13
 cd CMSSW_9_3_13/src
 cmsenv
+git-cms-addpkg Configuration/Generator
 git clone https://github.com/SiewYan/EdmEvGeneration.git
 cd EdmEvGeneration
 source setup.sh
