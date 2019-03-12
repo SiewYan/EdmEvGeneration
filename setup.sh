@@ -1,3 +1,3 @@
 #!/bin/bash
 
-mkdir -p $CMSSW_BASE/Configuration/GenProduction/python/ThirteenTeV/Hadronizer/
+mkdir -p $CMSSW_BASE/src/Configuration/GenProduction/python/ThirteenTeV/Hadronizer/
