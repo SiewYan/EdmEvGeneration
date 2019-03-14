@@ -2,7 +2,7 @@
 
 set -e
 
-Nevent=1000
+Nevent=20000
 
 if [ -z $1 ];then
     echo "ERROR, please supply fragment"
@@ -39,7 +39,7 @@ if [ "$flag" != "externalLHEProducer" ];then
 import FWCore.ParameterSet.Config as cms 
 externalLHEProducer = cms.EDProducer('ExternalLHEProducer',
 args = cms.vstring('${CMSSW_BASE}/src/EdmEvGeneration/$tar'),
-nEvents = cms.untracked.uint32(1000),
+nEvents = cms.untracked.uint32(${Nevent}),
 numberOfParameters = cms.uint32(1),
 outputFile = cms.string('cmsgrid_final.lhe'),
 scriptName = cms.FileInPath('GeneratorInterface/LHEInterface/data/run_generic_tarball_cvmfs.sh')
