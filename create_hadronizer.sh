@@ -2,6 +2,8 @@
 
 set -e
 
+Nevent=1000
+
 if [ -z $1 ];then
     echo "ERROR, please supply fragment"
     exit
@@ -20,6 +22,7 @@ if [ -z $2 ];then
     exit
 else
     tar=$2
+    tarname=`echo $tar | awk -F "/" '{print $NF}' | awk -F "_" '{print $1"_"$2}'`
     echo "Receive gridpack file = $tar"
 fi
 
@@ -36,7 +39,7 @@ if [ "$flag" != "externalLHEProducer" ];then
 import FWCore.ParameterSet.Config as cms 
 externalLHEProducer = cms.EDProducer('ExternalLHEProducer',
 args = cms.vstring('${CMSSW_BASE}/src/EdmEvGeneration/$tar'),
-nEvents = cms.untracked.uint32(5000),
+nEvents = cms.untracked.uint32(1000),
 numberOfParameters = cms.uint32(1),
 outputFile = cms.string('cmsgrid_final.lhe'),
 scriptName = cms.FileInPath('GeneratorInterface/LHEInterface/data/run_generic_tarball_cvmfs.sh')
@@ -57,17 +60,19 @@ scram b -j3
 echo "
 
 cmsDriver.py Configuration/GenProduction/python/ThirteenTeV/Hadronizer/${name}.py \
---mc -n 5000 -s GEN --datatier GEN-SIM --eventcontent RAWSIM \
---conditions auto:run2_mc_FULL --beamspot Realistic25ns13TeVEarly2017Collision  --no_exec
+--mc -n $Nevent -s LHE,GEN --datatier GEN,GEN-SIM --eventcontent LHE,RAWSIM --fileout=${tarname}.root \
+--conditions auto:run2_mc_FULL --beamspot Realistic25ns13TeVEarly2017Collision  --no_exec --python_filename=${tarname}_cff_GEN.py
 
 "
 
 begin=$(date +"%s")
 
 cmsDriver.py Configuration/GenProduction/python/ThirteenTeV/Hadronizer/${name}.py \
---mc -n 5000 -s LHE,GEN --datatier GEN,GEN-SIM --eventcontent LHE,RAWSIM \
---conditions auto:run2_mc_FULL --beamspot Realistic25ns13TeVEarly2017Collision  --no_exec
+--mc -n $Nevent -s LHE,GEN --datatier GEN,GEN-SIM --eventcontent LHE,RAWSIM --fileout=${tarname}.root \
+--conditions auto:run2_mc_FULL --beamspot Realistic25ns13TeVEarly2017Collision  --no_exec --python_filename=${tarname}_cff_GEN.py
 
+begin=$(date +"%s")
+echo "cmsRun ${tarname}_cff_GEN.py"
 termin=$(date +"%s")
 difftimelps=$(($termin-$begin))
 echo "$(($difftimelps / 60)) minutes and $(($difftimelps % 60)) seconds elapsed for Script Execution."
