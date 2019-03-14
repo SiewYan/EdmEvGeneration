@@ -34,18 +34,21 @@ class JetAnalyzer {
     public:
         JetAnalyzer(edm::ParameterSet&, edm::ConsumesCollector&&);
         ~JetAnalyzer();
-	virtual std::vector<reco::GenJet> FillGenJetVector(const edm::Event&);
-        virtual std::vector<pat::Jet> FillJetVector(const edm::Event&);
+	virtual std::vector<reco::GenJet> FillAK4GenJetVector(const edm::Event&);
+	virtual std::vector<reco::GenJet> FillAK8GenJetVector(const edm::Event&);
+        //virtual std::vector<pat::Jet> FillJetVector(const edm::Event&);
         virtual void CleanJetsFromMuons(std::vector<pat::Jet>&, std::vector<pat::Muon>&, float);
         virtual void CleanJetsFromElectrons(std::vector<pat::Jet>&, std::vector<pat::Electron>&, float);
-        virtual pat::MET FillMetVector(const edm::Event&);
+        //virtual pat::MET FillMetVector(const edm::Event&);
+	virtual reco::GenMET FillCaloMetVector(const edm::Event&);
+	virtual reco::GenMET FillTrueMetVector(const edm::Event&);
       
     private:
-    
-        edm::EDGetTokenT<std::vector<pat::Jet> > JetToken;
-        edm::EDGetTokenT<std::vector<pat::MET> > MetToken;
-	edm::EDGetTokenT<reco::VertexCollection> VertexToken;
-	edm::EDGetTokenT<std::vector<reco::GenJet> > GenJetToken;
+
+	edm::EDGetTokenT<std::vector<reco::GenJet> > Jetak4Token;
+	edm::EDGetTokenT<std::vector<reco::GenJet> > Jetak8Token;
+	edm::EDGetTokenT<std::vector<reco::GenMET> > MetcaloToken;
+	edm::EDGetTokenT<std::vector<reco::GenMET> > MettrueToken;;
 
 };
 

@@ -4,10 +4,10 @@
 
 
 JetAnalyzer::JetAnalyzer(edm::ParameterSet& PSet, edm::ConsumesCollector&& CColl):
-  JetToken(CColl.consumes<std::vector<pat::Jet> >(PSet.getParameter<edm::InputTag>("jets"))),
-  MetToken(CColl.consumes<std::vector<pat::MET> >(PSet.getParameter<edm::InputTag>("met"))),
-  VertexToken(CColl.consumes<reco::VertexCollection>(PSet.getParameter<edm::InputTag>("vertices"))),
-  GenJetToken(CColl.consumes<std::vector<reco::GenJet> >(PSet.getParameter<edm::InputTag>("genjets")))
+  Jetak4Token(CColl.consumes<std::vector<reco::GenJet> >(PSet.getParameter<edm::InputTag>("ak4genJets"))),
+  Jetak8Token(CColl.consumes<std::vector<reco::GenJet> >(PSet.getParameter<edm::InputTag>("ak8genJets"))),
+  MetcaloToken(CColl.consumes<std::vector<reco::GenMET> >(PSet.getParameter<edm::InputTag>("genmetCalo"))),
+  MettrueToken(CColl.consumes<std::vector<reco::GenMET> >(PSet.getParameter<edm::InputTag>("genmetTrue")))
 {
     
     std::cout << " --- JetAnalyzer initialization ---" << std::endl;
@@ -27,13 +27,13 @@ JetAnalyzer::JetAnalyzer(edm::ParameterSet& PSet, edm::ConsumesCollector&& CColl
 JetAnalyzer::~JetAnalyzer() {
 
 }
-std::vector<reco::GenJet> JetAnalyzer::FillGenJetVector(const edm::Event& iEvent) {
+std::vector<reco::GenJet> JetAnalyzer::FillAK4GenJetVector(const edm::Event& iEvent) {
   std::vector<reco::GenJet> Vect;
   // Declare and open collection
   edm::Handle<std::vector<reco::GenJet> > GenJetsCollection;
-  iEvent.getByToken(GenJetToken, GenJetsCollection);
+  iEvent.getByToken(Jetak4Token, GenJetsCollection);
 
-  // Loop on Jet collection                                                                                                                                                                                                                              
+  // Loop on Jet collection                                                                                                                                                             
   for(std::vector<reco::GenJet>::const_iterator it=GenJetsCollection->begin(); it!=GenJetsCollection->end(); ++it) {
     reco::GenJet genjet=*it;
     Vect.push_back(genjet);
@@ -41,26 +41,18 @@ std::vector<reco::GenJet> JetAnalyzer::FillGenJetVector(const edm::Event& iEvent
   return Vect;
 }
 
-std::vector<pat::Jet> JetAnalyzer::FillJetVector(const edm::Event& iEvent) {
-    std::vector<pat::Jet> Vect;
-    // Declare and open collection
-    edm::Handle<std::vector<pat::Jet> > PFJetsCollection;
-    iEvent.getByToken(JetToken, PFJetsCollection);
+std::vector<reco::GenJet> JetAnalyzer::FillAK8GenJetVector(const edm::Event& iEvent) {
+  std::vector<reco::GenJet> Vect;
+  // Declare and open collection                                                                                                                                                                                                            
+  edm::Handle<std::vector<reco::GenJet> > GenJetsCollection;
+  iEvent.getByToken(Jetak8Token, GenJetsCollection);
 
-    // Vertex collection
-    edm::Handle<reco::VertexCollection> PVCollection;
-    iEvent.getByToken(VertexToken, PVCollection);
- 
-    // Loop on Jet collection
-    for(std::vector<pat::Jet>::const_iterator it=PFJetsCollection->begin(); it!=PFJetsCollection->end(); ++it) {
-      
-      pat::Jet jet=*it;
-      //const reco::GenJet* genJet=jet.genJet();
-      if (jet.pt()<30) continue;
-      if (abs(jet.eta())>2.5)continue;
-      Vect.push_back(jet); // Fill vector
-    }
-    return Vect;
+  // Loop on Jet collection                                                                                                                                                                                                              
+  for(std::vector<reco::GenJet>::const_iterator it=GenJetsCollection->begin(); it!=GenJetsCollection->end(); ++it) {
+  reco::GenJet genjet=*it;
+  Vect.push_back(genjet);
+  }
+  return Vect;
 }
 
 void JetAnalyzer::CleanJetsFromMuons(std::vector<pat::Jet>& Jets, std::vector<pat::Muon>& Muons, float angle) {
@@ -81,18 +73,16 @@ void JetAnalyzer::CleanJetsFromElectrons(std::vector<pat::Jet>& Jets, std::vecto
     }
 }
 
-pat::MET JetAnalyzer::FillMetVector(const edm::Event& iEvent) {
-    
-    edm::Handle<std::vector<pat::MET> > MetCollection;
-    iEvent.getByToken(MetToken, MetCollection);
-    pat::MET MEt = MetCollection->front();
-    MEt.addUserFloat("ptShiftJetResUp", MEt.shiftedPt(pat::MET::METUncertainty::JetResUp));
-    MEt.addUserFloat("ptShiftJetResDown", MEt.shiftedPt(pat::MET::METUncertainty::JetResDown));
-    MEt.addUserFloat("ptShiftJetEnUp", MEt.shiftedPt(pat::MET::METUncertainty::JetEnUp));
-    MEt.addUserFloat("ptShiftJetEnDown", MEt.shiftedPt(pat::MET::METUncertainty::JetEnDown));
-    MEt.addUserFloat("ptShiftUnclusteredEnUp", MEt.shiftedPt(pat::MET::METUncertainty::UnclusteredEnUp));
-    MEt.addUserFloat("ptShiftUnclusteredEnDown", MEt.shiftedPt(pat::MET::METUncertainty::UnclusteredEnDown));
-    MEt.addUserFloat("ptRaw", MEt.uncorPt());
-    MEt.addUserFloat("phiRaw", MEt.uncorPhi());
-    return MEt;
+reco::GenMET JetAnalyzer::FillCaloMetVector(const edm::Event& iEvent) {
+  edm::Handle<std::vector<reco::GenMET> > MetCollection;
+  iEvent.getByToken(MetcaloToken, MetCollection);
+  reco::GenMET MEt = MetCollection->front();
+  return MEt;
+}
+
+reco::GenMET JetAnalyzer::FillTrueMetVector(const edm::Event& iEvent) {
+  edm::Handle<std::vector<reco::GenMET> > MetCollection;
+  iEvent.getByToken(MettrueToken, MetCollection);
+  reco::GenMET MEt = MetCollection->front();
+  return MEt;
 }

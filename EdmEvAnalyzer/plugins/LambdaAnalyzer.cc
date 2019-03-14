@@ -31,9 +31,7 @@
 //
 LambdaAnalyzer::LambdaAnalyzer(const edm::ParameterSet& iConfig):
   GenPSet(iConfig.getParameter<edm::ParameterSet>("genSet")),
-  JetPSet(iConfig.getParameter<edm::ParameterSet>("jetSet")),
-  ElectronPSet(iConfig.getParameter<edm::ParameterSet>("electronSet")),
-  MuonPSet(iConfig.getParameter<edm::ParameterSet>("muonSet")),
+  GenJetPSet(iConfig.getParameter<edm::ParameterSet>("genjetSet")),
   HistFile(iConfig.getParameter<std::string>("histFile"))
 {
    //now do what ever initialization is needed
@@ -42,14 +40,11 @@ LambdaAnalyzer::LambdaAnalyzer(const edm::ParameterSet& iConfig):
 
    // Initialize Objects
    theGenAnalyzer      = new GenAnalyzer(GenPSet, consumesCollector());
-   theJetAnalyzer      = new JetAnalyzer(JetPSet, consumesCollector());
-   theElectronAnalyzer = new ElectronAnalyzer(ElectronPSet, consumesCollector());
-   theMuonAnalyzer     = new MuonAnalyzer(MuonPSet, consumesCollector());
+   theJetAnalyzer      = new JetAnalyzer(GenJetPSet, consumesCollector());
 
    //  ---------- Plots Initialization ----------
    TFileDirectory allDir=fs->mkdir("All/");
    TFileDirectory genDir=fs->mkdir("Gen/");
-   TFileDirectory recoDir=fs->mkdir("Reco/");
    
    //make TH1F
    //std::vector<std::string> nLabels={"All", "Trigger", "Iso Lep #geq 2", "Z cand ", "Jets #geq 2", "Z mass ", "h mass ", "Top veto", "bJets #geq 1", "bJets #geq 2"};
@@ -64,13 +59,11 @@ LambdaAnalyzer::LambdaAnalyzer(const edm::ParameterSet& iConfig):
      throw cms::Exception("Analyzer", HistFile + " file not found");
    }
    while(histFile >> name >> title >> nbins >> min >> max >> opt) {
-       //std::cout << name << ", " << title << ", " << nbins << ", " << min << ", " << ", " << max << ", " << opt << std::endl;
 
      if(name.find('#')==std::string::npos) {
        while(title.find("~")!=std::string::npos) title=title.replace(title.find("~"), 1, " "); // Remove ~
        if(name.substr(0, 2)=="a_") Hist[name] = allDir.make<TH1F>(name.c_str(), title.c_str(), nbins, min, max);
        if(name.substr(0, 2)=="g_") Hist[name] = genDir.make<TH1F>(name.c_str(), title.c_str(), nbins, min, max);
-       if(name.substr(0, 2)=="r_") Hist[name] = recoDir.make<TH1F>(name.c_str(), title.c_str(), nbins, min, max); 
 
      Hist[name]->Sumw2();
      Hist[name]->SetOption(opt.c_str());
@@ -89,8 +82,6 @@ LambdaAnalyzer::~LambdaAnalyzer(){
   std::cout << "---------- ENDING  ----------" << std::endl;
   delete theGenAnalyzer;
   delete theJetAnalyzer;
-  delete theElectronAnalyzer;
-  delete theMuonAnalyzer;
   
 }
 
@@ -107,7 +98,7 @@ float LambdaAnalyzer::deltaPhi(float phi1, float phi2){
     return 2*3.14159265-PHI; 
 }
 
-std::vector<const reco::GenParticle*> LambdaAnalyzer::IndexByPtGen(std::vector<const reco::GenParticle*> vector)
+std::vector<reco::GenParticle> LambdaAnalyzer::IndexByPtGen(std::vector<reco::GenParticle> vector)
 {
   compgen comparatorgen;
 
@@ -115,7 +106,7 @@ std::vector<const reco::GenParticle*> LambdaAnalyzer::IndexByPtGen(std::vector<c
   return vector;
 }
 
-std::vector<pat::Jet> LambdaAnalyzer::IndexByPtPat(std::vector<pat::Jet> vector)
+std::vector<reco::GenJet> LambdaAnalyzer::IndexByPtGenJet(std::vector<reco::GenJet> vector)
 {
   comppat comparatorpat;
 
@@ -137,8 +128,6 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    nJets=0; EventWeight=1.;
   
    Hist["a_nEvents"]->Fill(1.,EventWeight);
-   //std::cout << "Event filled" << std::endl;
-   //std::cout << std::endl;
 
    //GEN
    // Gen Weight
@@ -148,172 +137,191 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    //std::map<std::string, float> LheMap = theGenAnalyzer->FillLheMap(iEvent);
 
    // Gen Particle
-   std::vector<reco::GenParticle> GenPVect = theGenAnalyzer->FillGenVector(iEvent);
-
-   // Gen candidates
-   //reco::Candidate* theGenZ = theGenAnalyzer->FindGenParticle(GenPVect, 23);
-   //reco::Candidate* theGenW = theGenAnalyzer->FindGenParticle(GenPVect, 24);
-   //reco::Candidate* theGenTop     = theGenAnalyzer->FindGenParticle(GenPVect, 6);
-   //reco::Candidate* theGenAntiTop = theGenAnalyzer->FindGenParticle(GenPVect, -6);
-
-   //reco::Candidate* theDM = theGenAnalyzer->FindGenParticle(GenPVect, 52);
-   //reco::Candidate* theZp = theGenAnalyzer->FindGenParticle(GenPVect, 55);
-   //reco::Candidate* thehs = theGenAnalyzer->FindGenParticle(GenPVect, 54);
-   
-   //Hist["g_Zpmass"]->Fill(theZp->mass(),EventWeight);
-   //Hist["g_Zppt"]->Fill(theZp->pt(),EventWeight);
-   //Hist["g_Zpeta"]->Fill(theZp->eta(),EventWeight);
-   //Hist["g_Zpphi"]->Fill(theZp->phi(),EventWeight);
-
-   //Hist["g_DMmass"]->Fill(theDM->mass(),EventWeight);
-   //Hist["g_DMpt"]->Fill(theDM->pt(),EventWeight);
-   //Hist["g_DMeta"]->Fill(theDM->eta(),EventWeight);
-   //Hist["g_DMphi"]->Fill(theDM->phi(),EventWeight);
-
-   //Hist["g_hsmass"]->Fill(thehs->mass(),EventWeight);
-   //Hist["g_hspt"]->Fill(thehs->pt(),EventWeight);
-   //Hist["g_hseta"]->Fill(thehs->eta(),EventWeight);
-   //Hist["g_hsphi"]->Fill(thehs->phi(),EventWeight);
-   
-   /*
-   //std::vector<reco::Candidate*> theDM = theGenAnalyzer->FindGenParticleVector(GenPVect, 52);
-   //std::vector<reco::Candidate*> theZp = theGenAnalyzer->FindGenParticleVector(GenPVect, 55);
-   //std::vector<reco::Candidate*> thehs = theGenAnalyzer->FindGenParticleVector(GenPVect, 54);
-
    std::vector<int> LepIds = {11,13,15,-11,-13,-15};
+   std::vector<int> MuIds = {13,-13};
+   std::vector<int> ElIds = {11,-11};
    std::vector<int> NeuIds = {12,14,16,-12,-14,-16};
    std::vector<int> HadIds = {1,2,3,4,5,-1,-2,-3,-4,-5};
 
-   reco::GenParticle* theGenLep = theGenAnalyzer->FindGenParticleGenByIds(GenPVect, LepIds);
-   reco::GenParticle* theGenNeu = theGenAnalyzer->FindGenParticleGenByIds(GenPVect, NeuIds);
-   reco::GenParticle* theGenHad = theGenAnalyzer->FindGenParticleGenByIds(GenPVect, HadIds);
-   */
+   std::vector<int> WIds = {24,-24};
+   std::vector<int> ZIds = {23};
+   std::vector<int> ZpIds = {1023};
 
-   //std::cout << "Call candidates" << std::endl;
-   //std::cout << std::endl;
+   std::vector<reco::GenParticle> GenPVect = theGenAnalyzer->FillGenVector(iEvent);
 
-   // Electron
-   std::vector<pat::Electron> ElecVect = theElectronAnalyzer->FillElectronVector(iEvent);
-
-   // Muon
-   std::vector<pat::Muon> MuonVect = theMuonAnalyzer->FillMuonVector(iEvent);
-
-   // Jet
-   std::vector<pat::Jet> JetsVect = theJetAnalyzer->FillJetVector(iEvent);
-   Hist["r_nJetb"]->Fill(JetsVect.size(),EventWeight);
-   theJetAnalyzer->CleanJetsFromMuons(JetsVect, MuonVect, 0.4);
-   theJetAnalyzer->CleanJetsFromElectrons(JetsVect, ElecVect, 0.4);
-
-   // GenJet
-   std::vector<reco::GenJet> GenJetsVect = theJetAnalyzer->FillGenJetVector(iEvent);
+   // Gen candidates
+   // filter out leptons
+   //////
+   std::vector<reco::GenParticle> theGenMu;
+   std::vector<reco::GenParticle> theGenEl;
+   std::vector<reco::GenParticle> theGenHad;
    
-   //MET
-   pat::MET MET = theJetAnalyzer->FillMetVector(iEvent);   
+   std::vector<reco::GenParticle> theGenmu = theGenAnalyzer->FilterGenVectorbyId(GenPVect, MuIds);
+   std::vector<reco::GenParticle> theGenel = theGenAnalyzer->FilterGenVectorbyId(GenPVect, ElIds);
+   std::vector<reco::GenParticle> theGenhad = theGenAnalyzer->FilterGenVectorbyId(GenPVect, HadIds);
+   theGenMu = IndexByPtGen(theGenmu);
+   theGenEl = IndexByPtGen(theGenel);
+   theGenHad = IndexByPtGen(theGenhad);
+
+   // boson
+   reco::Candidate* theGenZ = theGenAnalyzer->FindGenParticle(GenPVect, 23);
+   reco::Candidate* theGenW = theGenAnalyzer->FindGenParticle(GenPVect, 24);
+
+   std::vector<reco::GenParticle> thegenz = theGenAnalyzer->FilterGenVectorbyId(GenPVect, WIds);
+   std::vector<reco::GenParticle> thegenw = theGenAnalyzer->FilterGenVectorbyId(GenPVect, ZIds);
+   std::vector<reco::GenParticle> thezp = theGenAnalyzer->FilterGenVectorbyId(GenPVect, ZpIds);
    
-   Hist["a_met"]->Fill(MET.pt(), EventWeight);
-   // Save MET phi
-   METphi = MET.phi();
-   METeta = MET.eta();
-   //std::cout << "MET filled" << std::endl;
-   //std::cout << std::endl;
+   for(unsigned int i = 0; i < thezp.size(); i++){
+     reco::GenParticle* darkphoton = &(thezp[i]);
+     if ( darkphoton->status()!=62 ) continue;
+     Hist["g_Zppt"]->Fill(darkphoton->pt(), EventWeight);
+     Hist["g_Zpeta"]->Fill(darkphoton->eta(), EventWeight);
+     Hist["g_Zpphi"]->Fill(darkphoton->phi(), EventWeight);
+     Hist["g_Zpmass"]->Fill(darkphoton->mass(), EventWeight);
+     Hist["g_Zppdgid"]->Fill(darkphoton->pdgId(), EventWeight);
+   }
+
+   // exotica
+   //reco::Candidate* theZp = theGenAnalyzer->FindGenParticle(GenPVect, 1023);
+
+   //FILL
+   reco::Particle::LorentzVector V;
+   reco::Particle::LorentzVector Mu1(0.,0.,0.,0.);
+   reco::Particle::LorentzVector Mu2(0.,0.,0.,0.);
+
+   unsigned int ct=1;
+   for(unsigned int i = 0; i < theGenMu.size(); i++){
+     reco::GenParticle* part = &(theGenMu[i]);
+     
+     if ( part->status()!=1 ) continue;
+     ct++;
+     if ( ct > 3 ) break;
+     Hist[("g_Mu"+std::to_string(ct+1)+"pt").c_str()]->Fill(part->pt(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct+1)+"eta").c_str()]->Fill(part->eta(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct+1)+"phi").c_str()]->Fill(part->phi(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct+1)+"pdgid").c_str()]->Fill(part->pdgId(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct+1)+"status").c_str()]->Fill(part->status(), EventWeight);
+     
+     if (ct == 1 ) Mu1 = theGenMu[i].p4();
+     if (ct == 2 ) Mu1 = theGenMu[i].p4();
+   }
+
    
+   V = Mu1 + Mu2;
+   Hist["g_Vpt"]->Fill(V.Pt(), EventWeight);
+   Hist["g_Veta"]->Fill(V.Eta(), EventWeight);
+   Hist["g_Vphi"]->Fill(V.Phi(), EventWeight);
+   Hist["g_Vmass"]->Fill(V.M(), EventWeight);
+
+   for(unsigned int i = 0; i < theGenEl.size(); i++){
+     reco::GenParticle* part = &(theGenEl[i]);
+     if (i>2) break;
+     Hist[("g_El"+std::to_string(i+1)+"pt").c_str()]->Fill(part->pt(), EventWeight);
+     Hist[("g_El"+std::to_string(i+1)+"eta").c_str()]->Fill(part->eta(), EventWeight);
+     Hist[("g_El"+std::to_string(i+1)+"phi").c_str()]->Fill(part->phi(), EventWeight);
+     Hist[("g_El"+std::to_string(i+1)+"pdgid").c_str()]->Fill(part->pdgId(), EventWeight);
+   }
+
+   for(unsigned int i = 0; i < theGenHad.size(); i++){
+     reco::GenParticle* part = &(theGenHad[i]);
+     if (i>2) break;
+     Hist[("g_Had"+std::to_string(i+1)+"pt").c_str()]->Fill(part->pt(), EventWeight);
+     Hist[("g_Had"+std::to_string(i+1)+"eta").c_str()]->Fill(part->eta(), EventWeight);
+     Hist[("g_Had"+std::to_string(i+1)+"phi").c_str()]->Fill(part->phi(), EventWeight);
+     Hist[("g_Had"+std::to_string(i+1)+"pdgid").c_str()]->Fill(part->pdgId(), EventWeight);
+   }
+   
+   if ( theGenMu.size()>=2 ){
+     //deltaPhi of two muon
+     Hist["g_Mu12dPhi"]->Fill(deltaPhi( theGenMu[0].phi() , theGenMu[1].phi() ), EventWeight);
+     //deltaR of two muon
+     Hist["g_Mu12dR"]->Fill(deltaR( theGenMu[0].phi(), theGenMu[0].eta(), theGenMu[1].phi(), theGenMu[1].eta() ), EventWeight);
+   }
+   
+   if( theGenEl.size()>=2 ){
+     //deltaPhi of two electron
+     Hist["g_El12dPhi"]->Fill(deltaPhi( theGenEl[0].phi() , theGenEl[1].phi() ), EventWeight);
+     //deltaR of two electron
+     Hist["g_El12dR"]->Fill(deltaR( theGenEl[0].phi(), theGenEl[0].eta(), theGenEl[1].phi(), theGenEl[1].eta() ), EventWeight);
+   }
+   
+   if (theGenZ!=NULL){
+     Hist["g_GenZpt"]->Fill(theGenZ->pt(), EventWeight);
+     Hist["g_GenZeta"]->Fill(theGenZ->eta(), EventWeight);
+     Hist["g_GenZphi"]->Fill(theGenZ->phi(), EventWeight);
+     Hist["g_GenZmass"]->Fill(theGenZ->mass(), EventWeight);
+     Hist["g_GenZpdgid"]->Fill(theGenZ->pdgId(), EventWeight);
+   }
+
+   if (theGenW!=NULL){
+     Hist["g_GenWpt"]->Fill(theGenW->pt(), EventWeight);
+     Hist["g_GenWeta"]->Fill(theGenW->eta(), EventWeight);
+     Hist["g_GenWphi"]->Fill(theGenW->phi(), EventWeight);
+     Hist["g_GenWmass"]->Fill(theGenW->mass(), EventWeight);
+     Hist["g_GenWpdgid"]->Fill(theGenW->pdgId(), EventWeight);
+   }
+
+   // *****************************************************
+
+   // Gen Jet
+   std::vector<reco::GenJet> AK4JetsVect;
+   std::vector<reco::GenJet> AK8JetsVect;
+   std::vector<reco::GenJet> aK4JetsVect = theJetAnalyzer->FillAK4GenJetVector(iEvent);
+   std::vector<reco::GenJet> aK8JetsVect = theJetAnalyzer->FillAK8GenJetVector(iEvent);
+   AK4JetsVect = IndexByPtGenJet(aK4JetsVect);
+   AK8JetsVect = IndexByPtGenJet(aK8JetsVect);
+
+   //AK4
+   Hist["g_GenAK4nJet"]->Fill(AK4JetsVect.size(), EventWeight);
+   for(unsigned int i = 0; i < AK4JetsVect.size(); i++){
+     reco::GenJet* jet = &(AK4JetsVect[i]);
+     if (i>2) break;
+     Hist[("g_GenAK4Jet"+std::to_string(i+1)+"pt").c_str()]->Fill(jet->pt(), EventWeight);
+     Hist[("g_GenAK4Jet"+std::to_string(i+1)+"eta").c_str()]->Fill(jet->eta(), EventWeight);
+     Hist[("g_GenAK4Jet"+std::to_string(i+1)+"phi").c_str()]->Fill(jet->phi(), EventWeight);
+     Hist[("g_GenAK4Jet"+std::to_string(i+1)+"mass").c_str()]->Fill(jet->mass(), EventWeight);
+     Hist[("g_GenAK4Jet"+std::to_string(i+1)+"pdgid").c_str()]->Fill(jet->pdgId(), EventWeight);
+   }
+   
+   if (AK4JetsVect.size()>0 || AK4JetsVect.size()>=2){
+     //deltaPhi of two lepton                                                                                                                                                                                                 
+     Hist["g_GenAK4j12dPhi"]->Fill(deltaPhi( AK4JetsVect[0].phi() , AK4JetsVect[1].phi() ), EventWeight);
+     //deltaR of two lepton                                                                                                                                                                                                            
+     Hist["g_GenAK4j12dR"]->Fill(deltaR( AK4JetsVect[0].phi(), AK4JetsVect[0].eta(), AK4JetsVect[1].phi(), AK4JetsVect[1].eta() ), EventWeight);
+   }
+
+   //AK8
+   Hist["g_GenAK8nJet"]->Fill(AK8JetsVect.size(), EventWeight);
+   for(unsigned int i = 0; i < AK8JetsVect.size(); i++){
+     reco::GenJet* jet = &(AK8JetsVect[i]);
+     if (i>2) break;
+     Hist[("g_GenAK8Jet"+std::to_string(i+1)+"pt").c_str()]->Fill(jet->pt(), EventWeight);
+     Hist[("g_GenAK8Jet"+std::to_string(i+1)+"eta").c_str()]->Fill(jet->eta(), EventWeight);
+     Hist[("g_GenAK8Jet"+std::to_string(i+1)+"phi").c_str()]->Fill(jet->phi(), EventWeight);
+     Hist[("g_GenAK8Jet"+std::to_string(i+1)+"mass").c_str()]->Fill(jet->mass(), EventWeight);
+     Hist[("g_GenAK8Jet"+std::to_string(i+1)+"pdgid").c_str()]->Fill(jet->pdgId(), EventWeight);
+   }
+
+   if (AK8JetsVect.size()>0 || AK8JetsVect.size()>=2){
+     //deltaPhi of two lepton                                                                                                                                                                                 
+     Hist["g_GenAK8j12dPhi"]->Fill(deltaPhi( AK8JetsVect[0].phi() , AK8JetsVect[1].phi() ), EventWeight);
+     //deltaR of two lepton                                                                                                                                                                                                          
+     Hist["g_GenAK8j12dR"]->Fill(deltaR( AK8JetsVect[0].phi(), AK8JetsVect[0].eta(), AK8JetsVect[1].phi(), AK8JetsVect[1].eta() ), EventWeight);
+   }
+
+   // Gen MET
+   reco::GenMET caloMET = theJetAnalyzer->FillCaloMetVector(iEvent);   
+   reco::GenMET trueMET = theJetAnalyzer->FillTrueMetVector(iEvent); 
+   
+   Hist["a_genCaloMETpt"]->Fill(caloMET.pt(), EventWeight);
+   Hist["a_genCaloMETphi"]->Fill(caloMET.phi(), EventWeight);
+   Hist["a_genTrueMETpt"]->Fill(trueMET.pt(), EventWeight);
+   Hist["a_genTrueMETphi"]->Fill(trueMET.phi(), EventWeight);
+
    // Fill number of events when MET > 200 GeV
-   if ( MET.pt() > 200. ) Hist["a_nEvents"]->Fill(2.,EventWeight);
-   if ( MET.pt() > 250. ) Hist["a_nEvents"]->Fill(3.,EventWeight);
-
-   //JET MC Truth
-   //The pruned genParticles are the ones pointed by the MC matching of the high level patObjectes (e.g. pat::Electron::genParticle()) 
-   //https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookMiniAOD2016#MC_Truth
-
-   //Matching by R may not work reliably in dense environments, such as jets. For studies needing high quality matching of reconstructed tracks with true tracks, it is possible to base the matching either on the number of hits that they share in common, or on a comparison of the 5 helix parameters describing the track. 
-
-   std::vector<const reco::GenParticle*> HardGenJetsVect;
-   std::vector<pat::Jet> HardJetsVect;
-
-   for(unsigned int i = 0; i < JetsVect.size(); i++){
-     //std::cout<<"jet pt = "<<JetsVect[i].pt()<<std::endl;
-     pat::Jet j = JetsVect[i];
-     if (j.genParton() == NULL)
-       continue;
-     /*
-     std::cout<<"genParton pdgid = "<< ( j.genParton() )->pdgId() <<std::endl;
-     std::cout<<"Robust Flags"<<std::endl;
-     std::cout<<"isPromptFinalState() = "<< ( j.genParton() )->isPromptFinalState() <<std::endl;
-     std::cout<<"Less robust Flags"<<std::endl;
-     std::cout<<"isHardProcess() = "<< ( j.genParton() )->isHardProcess() <<std::endl;
-     std::cout<<"fromHardProcessFinalState() = "<< ( j.genParton() )->fromHardProcessFinalState() <<std::endl;
-     std::cout<<"fromHardProcessDecayed() = "<< ( j.genParton() )->fromHardProcessDecayed() <<std::endl;
-     std::cout<<"isLastCopy() = "<< ( j.genParton() )->isLastCopy() <<std::endl;
-
-     std::cout<<"hadronFlavour = "<<(JetsVect[i].hadronFlavour())<<std::endl;
-     std::cout<<"partonFlavour = "<<(JetsVect[i].partonFlavour())<<std::endl;
-     */
-
-     if (j.genParton()->isHardProcess()){
-       HardGenJetsVect.push_back( j.genParton() );
-       HardJetsVect.push_back(j);
-     }
-   }
-
-   std::cout << "Before Sorting" << std::endl; 
-   std::cout<<"Total number of match reco jet = "<< HardJetsVect.size() <<std::endl;
-   for(unsigned int i = 0; i < HardJetsVect.size(); i++){
-     pat::Jet j = HardJetsVect[i];
-     std::cout<<"Jet number "<<i<<" with j.pt() = "<<j.pt()<<std::endl;
-   }
-   //Sort vector
-   JetsVect.clear();
-   std::vector<const reco::GenParticle*> JetsMCmatch;
-   JetsVect = IndexByPtPat(HardJetsVect);
-   JetsMCmatch = IndexByPtGen(HardGenJetsVect);
-   std::cout << "After Sorting" << std::endl;
-   std::cout<<"Total number of match reco jet = "<< JetsVect.size() <<std::endl;
-   for(unsigned int i = 0; i < JetsVect.size(); i++){
-     pat::Jet j = JetsVect[i];
-     std::cout<<"Jet number "<<i<<" with j.pt() = "<<j.pt()<<std::endl;
-   }
-
-   //Filling
-   
-   //GenJet
-   Hist["g_nJet"]->Fill(JetsMCmatch.size(), EventWeight);
-   for(unsigned int i = 0; i < JetsMCmatch.size(); i++){
-     if (i>2) break;
-     Hist[("g_Jet"+std::to_string(i+1)+"pt").c_str()]->Fill(JetsMCmatch[i]->pt(), EventWeight);
-     Hist[("g_Jet"+std::to_string(i+1)+"eta").c_str()]->Fill(JetsMCmatch[i]->eta(), EventWeight);
-     if (JetsMCmatch.size() >= 2 )
-     {
-         Hist["g_J1J2dPhi"]->Fill(deltaPhi(JetsMCmatch[0]->phi(), JetsMCmatch[1]->phi()), EventWeight);
-         Hist["g_J1J2dEta"]->Fill(JetsMCmatch[0]->eta() - JetsMCmatch[1]->eta(), EventWeight);
-         Hist["g_J1J2dR"]->Fill(deltaR(JetsMCmatch[0]->phi(), JetsMCmatch[0]->eta(), JetsMCmatch[1]->phi(), JetsMCmatch[1]->eta()), EventWeight);
-     }
-    }
-   
-   //std::cout << "Genjet finished" << std::endl;
-   //std::cout << std::endl;
-  
-   nJets=JetsVect.size();
-   //RecoJet
-   Hist["r_nJet"]->Fill(nJets, EventWeight);
-   for(unsigned int i = 0; i < JetsVect.size(); i++){ 
-     if (i>2) break;
-     Hist[("r_Jet"+std::to_string(i+1)+"pt").c_str()]->Fill(JetsVect[i].pt(), EventWeight); 
-     Hist[("r_Jet"+std::to_string(i+1)+"eta").c_str()]->Fill(JetsVect[i].eta(), EventWeight); 
-     RecoJphi = JetsVect[0].phi();
-     RecoJeta = JetsVect[0].eta();
-     if (JetsVect.size() >= 2 )
-     {
-         Hist["r_J1J2dPhi"]->Fill(deltaPhi(JetsVect[0].phi(), JetsVect[1].phi()), EventWeight);
-         Hist["r_J1J2dEta"]->Fill(JetsVect[0].eta() - JetsVect[1].eta(), EventWeight);
-         Hist["r_J1J2dR"]->Fill(deltaR(JetsVect[0].phi(), JetsVect[0].eta(), JetsVect[1].phi(), JetsVect[1].eta()), EventWeight);
-     }
-   }
-   //std::cout << "Recojet finished" << std::endl;
-   //std::cout << std::endl;
-
-   // Calculate angle difference (delta phi) of MET and 
-   Hist["r_dPhi"]->Fill(deltaPhi(RecoJphi, METphi), EventWeight);
-   Hist["r_dR"]->Fill(deltaR(METphi, METeta, RecoJphi, RecoJeta), EventWeight);
+   if ( trueMET.pt() > 200. ) Hist["a_nEvents"]->Fill(2.,EventWeight);
+   // Fill number of events when MET > 200 GeV  
+   if ( trueMET.pt() > 250. ) Hist["a_nEvents"]->Fill(3.,EventWeight);
 
    tree->Fill();
    
