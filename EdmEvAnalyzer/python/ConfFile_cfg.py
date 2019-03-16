@@ -13,8 +13,20 @@ process.option = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-        #'file:$CMSSW_BASE/src/EdmEvGeneration/sherpa_HAHM_variableMW_UFO_Zpmumu_LO_13TeV_MASTER_cff_py_GEN.root'
-        'file:$CMSSW_BASE/src/EdmEvGeneration/Hadronizer_TuneCP5_13TeV_generic_LHE_pythia8_cff_py_LHE_GEN_inRAWSIM.root'
+        ##madgraph
+        ###m40
+        'file:$CMSSW_BASE/prod/mad/m40/run1/darkPhoton_m40_inRAWSIM.root',
+        'file:$CMSSW_BASE/prod/mad/m40/run2/darkPhoton_m40_inRAWSIM.root',
+        ###m200
+        'file:$CMSSW_BASE/prod/mad/m200/run1/darkPhoton_m200_inRAWSIM.root',
+        'file:$CMSSW_BASE/prod/mad/m200/run2/darkPhoton_m200_inRAWSIM.root',
+        ##sherp
+        ###m40 
+        'file:$CMSSW_BASE/prod/sherpa/m40/run1/sherpa_HAHM_variableMW_UFO_Zpmumu_m40_LO_13TeV_MASTER_cff_py_GEN.root',
+        'file:$CMSSW_BASE/prod/sherpa/m40/run2/sherpa_HAHM_variableMW_UFO_Zpmumu_m40_LO_13TeV_MASTER_cff_py_GEN.root',
+        ###m200
+        'file:$CMSSW_BASE/prod/sherpa/m200/run1/sherpa_HAHM_variableMW_UFO_Zpmumu_m200_LO_13TeV_MASTER_cff_py_GEN.root',
+        'file:$CMSSW_BASE/prod/sherpa/m200/run2/sherpa_HAHM_variableMW_UFO_Zpmumu_m200_LO_13TeV_MASTER_cff_py_GEN.root',
         )
 )
 
@@ -35,8 +47,10 @@ process.lamb = cms.EDAnalyzer("LambdaAnalyzer",
                               )
 
 process.TFileService = cms.Service("TFileService",
-                                   #fileName = cms.string("sherpa_HAHM_variableMW_UFO_Zpmumu_LO_13TeV.root"),
+                                   #fileName = cms.string("DarkPhotonToMuMu_M40_Sherpa.root"),
                                    fileName = cms.string("DarkPhotonToMuMu_M40_madgraph_pythia8_TuneCP5.root"),
+                                   #fileName = cms.string("DarkPhotonToMuMu_M200_Sherpa.root"),  
+                                   #fileName = cms.string("DarkPhotonToMuMu_M200_madgraph_pythia8_TuneCP5.root"),
                                    closeFileFast = cms.untracked.bool(True)
                                     )
 
