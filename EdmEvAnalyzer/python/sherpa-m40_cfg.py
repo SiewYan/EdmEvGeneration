@@ -34,6 +34,7 @@ process.lamb = cms.EDAnalyzer("LambdaAnalyzer",
                                                 genmetTrue = cms.InputTag('genMetTrue'),
                                                 ),
                               histFile = cms.string('%s/src/EdmEvGeneration/EdmEvAnalyzer/data/HistList.dat' % os.environ['CMSSW_BASE']),
+                              verbose = cms.bool(False),
                               )
 
 process.TFileService = cms.Service("TFileService",
