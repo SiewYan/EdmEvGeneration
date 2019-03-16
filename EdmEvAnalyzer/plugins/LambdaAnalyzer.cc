@@ -32,7 +32,8 @@
 LambdaAnalyzer::LambdaAnalyzer(const edm::ParameterSet& iConfig):
   GenPSet(iConfig.getParameter<edm::ParameterSet>("genSet")),
   GenJetPSet(iConfig.getParameter<edm::ParameterSet>("genjetSet")),
-  HistFile(iConfig.getParameter<std::string>("histFile"))
+  HistFile(iConfig.getParameter<std::string>("histFile")),
+  Verbose(iConfig.getParameter<bool>("verbose"))
 {
    //now do what ever initialization is needed
    usesResource("TFileService");
@@ -126,6 +127,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
  
    //Initialize event variable
    nJets=0; EventWeight=1.;
+
+   if(Verbose) std::cout<<"here1"<<std::endl;
   
    Hist["a_nEvents"]->Fill(1.,EventWeight);
 
@@ -170,6 +173,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    std::vector<reco::GenParticle> thegenz = theGenAnalyzer->FilterGenVectorbyId(GenPVect, WIds);
    std::vector<reco::GenParticle> thegenw = theGenAnalyzer->FilterGenVectorbyId(GenPVect, ZIds);
    std::vector<reco::GenParticle> thezp = theGenAnalyzer->FilterGenVectorbyId(GenPVect, ZpIds);
+
+   if(Verbose) std::cout<<"here2"<<std::endl;
    
    for(unsigned int i = 0; i < thezp.size(); i++){
      reco::GenParticle* darkphoton = &(thezp[i]);
@@ -181,6 +186,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      Hist["g_Zppdgid"]->Fill(darkphoton->pdgId(), EventWeight);
    }
 
+   if(Verbose) std::cout<<"here3"<<std::endl;
+
    // exotica
    //reco::Candidate* theZp = theGenAnalyzer->FindGenParticle(GenPVect, 1023);
 
@@ -189,6 +196,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    reco::Particle::LorentzVector Mu1(0.,0.,0.,0.);
    reco::Particle::LorentzVector Mu2(0.,0.,0.,0.);
 
+   if(Verbose) std::cout<<"here4"<<std::endl;
+
    unsigned int ct=1;
    for(unsigned int i = 0; i < theGenMu.size(); i++){
      reco::GenParticle* part = &(theGenMu[i]);
@@ -196,15 +205,17 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      if ( part->status()!=1 ) continue;
      ct++;
      if ( ct > 3 ) break;
-     Hist[("g_Mu"+std::to_string(ct+1)+"pt").c_str()]->Fill(part->pt(), EventWeight);
-     Hist[("g_Mu"+std::to_string(ct+1)+"eta").c_str()]->Fill(part->eta(), EventWeight);
-     Hist[("g_Mu"+std::to_string(ct+1)+"phi").c_str()]->Fill(part->phi(), EventWeight);
-     Hist[("g_Mu"+std::to_string(ct+1)+"pdgid").c_str()]->Fill(part->pdgId(), EventWeight);
-     Hist[("g_Mu"+std::to_string(ct+1)+"status").c_str()]->Fill(part->status(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct)+"pt").c_str()]->Fill(part->pt(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct)+"eta").c_str()]->Fill(part->eta(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct)+"phi").c_str()]->Fill(part->phi(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct)+"pdgid").c_str()]->Fill(part->pdgId(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct)+"status").c_str()]->Fill(part->status(), EventWeight);
      
      if (ct == 1 ) Mu1 = theGenMu[i].p4();
      if (ct == 2 ) Mu1 = theGenMu[i].p4();
    }
+
+   if(Verbose) std::cout<<"here5"<<std::endl;
 
    
    V = Mu1 + Mu2;
@@ -212,6 +223,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Hist["g_Veta"]->Fill(V.Eta(), EventWeight);
    Hist["g_Vphi"]->Fill(V.Phi(), EventWeight);
    Hist["g_Vmass"]->Fill(V.M(), EventWeight);
+
+   if(Verbose) std::cout<<"here6"<<std::endl;
 
    for(unsigned int i = 0; i < theGenEl.size(); i++){
      reco::GenParticle* part = &(theGenEl[i]);
@@ -222,6 +235,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      Hist[("g_El"+std::to_string(i+1)+"pdgid").c_str()]->Fill(part->pdgId(), EventWeight);
    }
 
+   if(Verbose) std::cout<<"here7"<<std::endl;
+
    for(unsigned int i = 0; i < theGenHad.size(); i++){
      reco::GenParticle* part = &(theGenHad[i]);
      if (i>2) break;
@@ -230,6 +245,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      Hist[("g_Had"+std::to_string(i+1)+"phi").c_str()]->Fill(part->phi(), EventWeight);
      Hist[("g_Had"+std::to_string(i+1)+"pdgid").c_str()]->Fill(part->pdgId(), EventWeight);
    }
+
+   if(Verbose) std::cout<<"here8"<<std::endl;
    
    if ( theGenMu.size()>=2 ){
      //deltaPhi of two muon
@@ -237,6 +254,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      //deltaR of two muon
      Hist["g_Mu12dR"]->Fill(deltaR( theGenMu[0].phi(), theGenMu[0].eta(), theGenMu[1].phi(), theGenMu[1].eta() ), EventWeight);
    }
+
+   if(Verbose) std::cout<<"here9"<<std::endl;
    
    if( theGenEl.size()>=2 ){
      //deltaPhi of two electron
@@ -244,6 +263,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      //deltaR of two electron
      Hist["g_El12dR"]->Fill(deltaR( theGenEl[0].phi(), theGenEl[0].eta(), theGenEl[1].phi(), theGenEl[1].eta() ), EventWeight);
    }
+
+   if(Verbose) std::cout<<"here10"<<std::endl;
    
    if (theGenZ!=NULL){
      Hist["g_GenZpt"]->Fill(theGenZ->pt(), EventWeight);
@@ -253,6 +274,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      Hist["g_GenZpdgid"]->Fill(theGenZ->pdgId(), EventWeight);
    }
 
+   if(Verbose) std::cout<<"here11"<<std::endl;
+
    if (theGenW!=NULL){
      Hist["g_GenWpt"]->Fill(theGenW->pt(), EventWeight);
      Hist["g_GenWeta"]->Fill(theGenW->eta(), EventWeight);
@@ -260,6 +283,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      Hist["g_GenWmass"]->Fill(theGenW->mass(), EventWeight);
      Hist["g_GenWpdgid"]->Fill(theGenW->pdgId(), EventWeight);
    }
+
+   if(Verbose) std::cout<<"here12"<<std::endl;
 
    // *****************************************************
 
@@ -282,6 +307,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      Hist[("g_GenAK4Jet"+std::to_string(i+1)+"mass").c_str()]->Fill(jet->mass(), EventWeight);
      Hist[("g_GenAK4Jet"+std::to_string(i+1)+"pdgid").c_str()]->Fill(jet->pdgId(), EventWeight);
    }
+
+   if(Verbose) std::cout<<"here13"<<std::endl;
    
    if (AK4JetsVect.size()>0 || AK4JetsVect.size()>=2){
      //deltaPhi of two lepton                                                                                                                                                                                                 
@@ -290,6 +317,8 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      Hist["g_GenAK4j12dR"]->Fill(deltaR( AK4JetsVect[0].phi(), AK4JetsVect[0].eta(), AK4JetsVect[1].phi(), AK4JetsVect[1].eta() ), EventWeight);
    }
 
+   if(Verbose) std::cout<<"here14"<<std::endl;
+   
    //AK8
    Hist["g_GenAK8nJet"]->Fill(AK8JetsVect.size(), EventWeight);
    for(unsigned int i = 0; i < AK8JetsVect.size(); i++){
@@ -302,12 +331,16 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      Hist[("g_GenAK8Jet"+std::to_string(i+1)+"pdgid").c_str()]->Fill(jet->pdgId(), EventWeight);
    }
 
+   if(Verbose) std::cout<<"here15"<<std::endl;
+
    if (AK8JetsVect.size()>0 || AK8JetsVect.size()>=2){
      //deltaPhi of two lepton                                                                                                                                                                                 
      Hist["g_GenAK8j12dPhi"]->Fill(deltaPhi( AK8JetsVect[0].phi() , AK8JetsVect[1].phi() ), EventWeight);
      //deltaR of two lepton                                                                                                                                                                                                          
      Hist["g_GenAK8j12dR"]->Fill(deltaR( AK8JetsVect[0].phi(), AK8JetsVect[0].eta(), AK8JetsVect[1].phi(), AK8JetsVect[1].eta() ), EventWeight);
    }
+
+   if(Verbose) std::cout<<"here16"<<std::endl;
 
    // Gen MET
    reco::GenMET caloMET = theJetAnalyzer->FillCaloMetVector(iEvent);   
@@ -318,10 +351,14 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Hist["a_genTrueMETpt"]->Fill(trueMET.pt(), EventWeight);
    Hist["a_genTrueMETphi"]->Fill(trueMET.phi(), EventWeight);
 
+   if(Verbose) std::cout<<"here17"<<std::endl;
+
    // Fill number of events when MET > 200 GeV
    if ( trueMET.pt() > 200. ) Hist["a_nEvents"]->Fill(2.,EventWeight);
    // Fill number of events when MET > 200 GeV  
    if ( trueMET.pt() > 250. ) Hist["a_nEvents"]->Fill(3.,EventWeight);
+
+   if(Verbose) std::cout<<"here18"<<std::endl;
 
    tree->Fill();
    

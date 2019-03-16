@@ -94,6 +94,7 @@ class LambdaAnalyzer : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
   JetAnalyzer* theJetAnalyzer;
 
   std::string HistFile;
+  bool Verbose;
   std::map<std::string, TH1F*> Hist;
   edm::Service<TFileService> fs;
   TTree* tree;
