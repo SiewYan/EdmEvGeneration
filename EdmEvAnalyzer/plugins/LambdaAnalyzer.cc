@@ -211,6 +211,7 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if(Verbose) std::cout<<"here4"<<std::endl;
 
    unsigned int ct=0;
+   std::vector<reco::GenParticle*> theChosenOneMuon;
    for(unsigned int i = 0; i < theGenMu.size(); i++){
      reco::GenParticle* part = &(theGenMu[i]);
      if (part->status()!=1 ) continue;
@@ -231,7 +232,9 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      ct++;
      if (ct == 1 ) Mu1 = part->p4();
      if (ct == 2 ) Mu2 = part->p4();
+     theChosenOneMuon.push_back(part);
    }
+   Hist["g_nMu"]->Fill(ct+1);
 
    if(Verbose) std::cout<<"here5"<<std::endl;
    
@@ -265,11 +268,11 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    if(Verbose) std::cout<<"here8"<<std::endl;
    
-   if ( theGenMu.size()>=2 ){
+   if ( theChosenOneMuon.size()>=2 ){
      //deltaPhi of two muon
-     Hist["g_Mu12dPhi"]->Fill(deltaPhi( theGenMu[0].phi() , theGenMu[1].phi() ), EventWeight);
+     Hist["g_Mu12dPhi"]->Fill(deltaPhi( theChosenOneMuon[0]->phi() , theChosenOneMuon[1]->phi() ), EventWeight);
      //deltaR of two muon
-     Hist["g_Mu12dR"]->Fill(deltaR( theGenMu[0].phi(), theGenMu[0].eta(), theGenMu[1].phi(), theGenMu[1].eta() ), EventWeight);
+     Hist["g_Mu12dR"]->Fill(deltaR( theChosenOneMuon[0]->phi(), theChosenOneMuon[0]->eta(), theChosenOneMuon[1]->phi(), theChosenOneMuon[1]->eta() ), EventWeight);
    }
 
    if(Verbose) std::cout<<"here9"<<std::endl;
