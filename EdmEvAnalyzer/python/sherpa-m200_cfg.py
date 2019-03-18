@@ -15,7 +15,7 @@ process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
         ###m200
         'file:$CMSSW_BASE/src/prod/sherpa/m200/run1/sherpa_HAHM_variableMW_UFO_Zpmumu_m200_LO_13TeV_MASTER_cff_py_GEN.root',
-        'file:$CMSSW_BASE/src/prod/sherpa/m200/run2/sherpa_HAHM_variableMW_UFO_Zpmumu_m200_LO_13TeV_MASTER_cff_py_GEN.root',
+        #'file:$CMSSW_BASE/src/prod/sherpa_dire/sherpa_HAHM_variableMW_UFO_Zpmumu_m200_LO_13TeV_MASTER_cff_py_GEN.root',
         )
 )
 
@@ -37,7 +37,8 @@ process.lamb = cms.EDAnalyzer("LambdaAnalyzer",
                               )
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string("DarkPhotonToMuMu_M200_madgraph_pythia8_TuneCP5.root"),
+                                   fileName = cms.string("DarkPhotonToMuMu_M200_Sherpa.root"),
+                                   #fileName = cms.string("Dire_M200_Sherpa.root"),
                                    closeFileFast = cms.untracked.bool(True)
                                     )
 

@@ -3,9 +3,13 @@ a_genCaloMETpt           ;genCaloMETpt~[GeV]          200   100  2000   Lin
 a_genCaloMETphi          ;genCaloMETphi               200   100  2000   Lin
 a_genTrueMETpt           ;genTrueMETpt~[GeV]          200   100  2000   Lin
 a_genTrueMETphi          ;genTrueMETphi               200   100  2000   Lin
+g_nMu                    ;nMu                        11   -0.5   10.5   Lin
 g_Mu1pt                 ;Mu1pt~[GeV]                30     0   150    Log
 g_Mu2pt                 ;Mu2pt~[GeV]                30     0   150    Log
 g_Mu3pt                 ;Mu3pt~[GeV]                30     0   150    Log
+g_Mu1ch                 ;Mu1charge                  3      -1.5  1.5  Lin 
+g_Mu2ch			;Mu2charge	            3	   -1.5	 1.5  Lin
+g_Mu3ch	      	        ;Mu3charge                  3     -1.5  1.5  Lin
 g_Mu1eta                ;Mu1eta                     100    -5     5   Lin
 g_Mu2eta                ;Mu2eta                     100    -5     5   Lin
 g_Mu3eta                ;Mu3eta                     100    -5     5   Lin
@@ -20,6 +24,7 @@ g_Mu2status             ;Mu2status                  10     0   10    Log
 g_Mu3status             ;Mu3status                  10     0   10    Log
 g_Mu12dPhi              ;Mu12dPhi                   50     0  3.15   Lin
 g_Mu12dR                ;Mu12dR                     100    0     5    Lin
+g_nEl                   ;nEl                        11   -0.5   10.5   Lin
 g_El1pt                 ;El1pt~[GeV]                30     0   150    Log
 g_El2pt                 ;El2pt~[GeV]                30     0   150    Log
 g_El3pt                 ;El3pt~[GeV]                30     0   150    Log
@@ -49,7 +54,7 @@ g_Had3pdgid              ;Had3pdgid                   30   -15.5  14.5   Lin
 g_Vpt                    ;Vpt                         50     0   200    Log
 g_Veta                   ;Veta                        100    -5     5   Lin
 g_Vphi                   ;Vphi                        50   -3.15  3.15   Lin
-g_Vmass                  ;Vmass                       20    0   100   Log
+g_Vmass                  ;Vmass                       60    0   300   Log
 g_GenZpt                 ;GenZpt~[GeV]                50     0   500    Log
 g_GenZeta                ;GenZeta                     100    -5     5   Lin
 g_GenZphi                ;GenZphi                     50   -3.15  3.15   Lin
@@ -63,8 +68,9 @@ g_GenWpdgid              ;GenWpdgid                   10   -15.5  14.5   Lin
 g_Zppt                   ;Zppt~[GeV]                  50     0   500    Log
 g_Zpeta                  ;Zpeta                       100    -5     5   Lin
 g_Zpphi                  ;Zpphi                       50   -3.15  3.15   Lin
-g_Zpmass                 ;Zpmass~[GeV/c2]             20    0   100   Log
+g_Zpmass                 ;Zpmass~[GeV/c2]             60    0   300   Log
 g_Zppdgid                ;Zppdgid                     30   -15.5  14.5   Lin
+g_Zpstatus               ;Zpstatus                    10     0   10    Log
 g_GenAK4nJet             ;GenAK4nJet                  11   -0.5   10.5   Lin
 g_GenAK8nJet             ;GenAK8nJet                  11   -0.5   10.5   Lin
 g_GenAK4Jet1pt           ;GenAK4Jet1pt~[GeV]          30     0   150    Log
@@ -82,7 +88,7 @@ g_GenAK4Jet3eta           ;GenAK4Jet3eta                100    -5     5   Lin
 g_GenAK4Jet3phi           ;GenAK4Jet3phi                50   -3.15  3.15   Lin
 g_GenAK4Jet3mass          ;GenAK4Jet3mass~[GeV/c2]      100    0    200   Log
 g_GenAK4Jet3pdgid         ;GenAK4Jet3pdgid              10   -15.5  14.5   Lin
-g_GenAK4j12dPhi          ;GenAK4j12dPhi               50   -3.15  3.15   Lin
+g_GenAK4j12dPhi          ;GenAK4j12dPhi               50    0  3.15   Lin
 g_GenAK4j12dR            ;GenAK4j12dR                 100     0     5    Lin
 g_GenAK8Jet1pt            ;GenAK8Jet1pt~[GeV]           30     0   150    Log
 g_GenAK8Jet1eta           ;GenAK8Jet1eta                100    -5     5   Lin

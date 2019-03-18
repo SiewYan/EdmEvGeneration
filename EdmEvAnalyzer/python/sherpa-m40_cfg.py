@@ -16,7 +16,7 @@ process.source = cms.Source("PoolSource",
         ##sherp
         ###m40 
         'file:$CMSSW_BASE/src/prod/sherpa/m40/run1/sherpa_HAHM_variableMW_UFO_Zpmumu_m40_LO_13TeV_MASTER_cff_py_GEN.root',
-        'file:$CMSSW_BASE/src/prod/sherpa/m40/run2/sherpa_HAHM_variableMW_UFO_Zpmumu_m40_LO_13TeV_MASTER_cff_py_GEN.root',
+        #'file:$CMSSW_BASE/src/prod/sherpa_dire/sherpa_HAHM_variableMW_UFO_Zpmumu_m40_LO_13TeV_MASTER_cff_py_GEN.root',
         )
 )
 
@@ -39,6 +39,7 @@ process.lamb = cms.EDAnalyzer("LambdaAnalyzer",
 
 process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string("DarkPhotonToMuMu_M40_Sherpa.root"),
+                                   #fileName = cms.string("Dire_M40_Sherpa.root"),
                                    closeFileFast = cms.untracked.bool(True)
                                     )
 

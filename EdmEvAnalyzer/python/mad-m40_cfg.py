@@ -16,7 +16,7 @@ process.source = cms.Source("PoolSource",
         ##madgraph
         ###m40
         'file:$CMSSW_BASE/src/prod/mad/m40/run1/darkPhoton_m40_inRAWSIM.root',
-        'file:$CMSSW_BASE/src/prod/mad/m40/run2/darkPhoton_m40_inRAWSIM.root',
+        #'file:$CMSSW_BASE/src/prod/mad/m40/run2/darkPhoton_m40_inRAWSIM.root',
         )
 )
 

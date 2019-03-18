@@ -166,6 +166,17 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    theGenEl = IndexByPtGen(theGenel);
    theGenHad = IndexByPtGen(theGenhad);
 
+   /*
+   for(unsigned int i = 0; i < theGenmu.size(); i++){
+     if (theGenmu[i].status()!=1 ) continue;
+
+     std::cout<<"unsorted"<<std::endl;
+     std::cout<<i<<"th gen mu pt = "<<theGenmu[i].pt()<<std::endl;
+     std::cout<<"pdgid in filter = "<<theGenmu[i].pdgId()<<std::endl;
+     std::cout<<i<<"th gen mu status = "<<theGenmu[i].status()<<std::endl;
+     std::cout<<i<<"th gen mu charge = "<<theGenmu[i].charge()<<std::endl;
+     }*/
+
    // boson
    reco::Candidate* theGenZ = theGenAnalyzer->FindGenParticle(GenPVect, 23);
    reco::Candidate* theGenW = theGenAnalyzer->FindGenParticle(GenPVect, 24);
@@ -178,12 +189,13 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    
    for(unsigned int i = 0; i < thezp.size(); i++){
      reco::GenParticle* darkphoton = &(thezp[i]);
-     if ( darkphoton->status()!=62 ) continue;
+     //if ( darkphoton->status()!=62 ) continue;
      Hist["g_Zppt"]->Fill(darkphoton->pt(), EventWeight);
      Hist["g_Zpeta"]->Fill(darkphoton->eta(), EventWeight);
      Hist["g_Zpphi"]->Fill(darkphoton->phi(), EventWeight);
      Hist["g_Zpmass"]->Fill(darkphoton->mass(), EventWeight);
      Hist["g_Zppdgid"]->Fill(darkphoton->pdgId(), EventWeight);
+     Hist["g_Zpstatus"]->Fill(darkphoton->status(), EventWeight);
    }
 
    if(Verbose) std::cout<<"here3"<<std::endl;
@@ -198,25 +210,30 @@ LambdaAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    if(Verbose) std::cout<<"here4"<<std::endl;
 
-   unsigned int ct=1;
+   unsigned int ct=0;
    for(unsigned int i = 0; i < theGenMu.size(); i++){
      reco::GenParticle* part = &(theGenMu[i]);
-     
-     if ( part->status()!=1 ) continue;
+     if (part->status()!=1 ) continue;
+
+     //std::cout<<"Sorted"<<std::endl;
+     //std::cout<<i<<"th theGenMu pt = "<<part->pt()<<std::endl;
+     //std::cout<<"pdgid in filter = "<<part->pdgId()<<std::endl;
+     //std::cout<<i<<"th theGenMu status = "<<part->status()<<std::endl;
+     //std::cout<<i<<"th theGenMu charge = "<<part->charge()<<std::endl;
+
+     if ( ct > 2 ) break;
+     Hist[("g_Mu"+std::to_string(ct+1)+"pt").c_str()]->Fill(part->pt(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct+1)+"eta").c_str()]->Fill(part->eta(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct+1)+"phi").c_str()]->Fill(part->phi(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct+1)+"pdgid").c_str()]->Fill(part->pdgId(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct+1)+"status").c_str()]->Fill(part->status(), EventWeight);
+     Hist[("g_Mu"+std::to_string(ct+1)+"ch").c_str()]->Fill(part->charge(), EventWeight);
      ct++;
-     if ( ct > 3 ) break;
-     Hist[("g_Mu"+std::to_string(ct)+"pt").c_str()]->Fill(part->pt(), EventWeight);
-     Hist[("g_Mu"+std::to_string(ct)+"eta").c_str()]->Fill(part->eta(), EventWeight);
-     Hist[("g_Mu"+std::to_string(ct)+"phi").c_str()]->Fill(part->phi(), EventWeight);
-     Hist[("g_Mu"+std::to_string(ct)+"pdgid").c_str()]->Fill(part->pdgId(), EventWeight);
-     Hist[("g_Mu"+std::to_string(ct)+"status").c_str()]->Fill(part->status(), EventWeight);
-     
-     if (ct == 1 ) Mu1 = theGenMu[i].p4();
-     if (ct == 2 ) Mu1 = theGenMu[i].p4();
+     if (ct == 1 ) Mu1 = part->p4();
+     if (ct == 2 ) Mu2 = part->p4();
    }
 
    if(Verbose) std::cout<<"here5"<<std::endl;
-
    
    V = Mu1 + Mu2;
    Hist["g_Vpt"]->Fill(V.Pt(), EventWeight);
